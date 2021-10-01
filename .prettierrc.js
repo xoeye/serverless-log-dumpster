@@ -5,6 +5,6 @@ module.exports = {
   semi: false,
   singleQuote: true,
   printWidth: 100,
-  arrowParens: 'avoid',
+  arrowParens: 'always',
   proseWrap: 'preserve',
 }
