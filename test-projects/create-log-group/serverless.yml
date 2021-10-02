@@ -1,0 +1,24 @@
+service: log-dumpster-integration-test
+
+frameworkVersion: '2'
+
+plugins:
+  - ../../
+
+logDumpster:
+  destinationBucketName: 0logbucket-xavier
+  destinationPathPrefix: cool
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: test
+  stackName: log-dumpster-integration-test
+  region: us-east-2
+  memorySize: 128
+
+functions:
+  this_function_stays:
+    handler: handler.handler
+  this_function_gets_removed:
+    handler: handler.handler
