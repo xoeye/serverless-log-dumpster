@@ -1,11 +1,15 @@
 const ctime = () => Math.floor(new Date().getTime())
 
+const runningUnitTests = () => ['it', 'describe'].every((fn) => global[fn] instanceof Function)
+
+const TIME_BETWEEN_CHECKS = runningUnitTests() ? 5 : 5 * 1000
+
 const waitForExportTask = async (describeExportTasks, taskId) => {
   while (true) {
     const resp = await describeExportTasks({ taskId })
     const task = resp.exportTasks[0]
 
-    switch ((task.status && task.status.code) || 'PENDING') {
+    switch (task.status && task.status.code) {
       case 'COMPLETED':
         return Math.ceil(task.executionInfo.completionTime - task.executionInfo.creationTime / 1000)
       case 'CANCELLED':
@@ -14,7 +18,7 @@ const waitForExportTask = async (describeExportTasks, taskId) => {
           `CloudWatch log group export failed! Task ID: ${taskId}, Status: ${task.status}`
         )
       default:
-        await new Promise((resolve) => setTimeout(resolve, 5 * 1000))
+        await new Promise((resolve) => setTimeout(resolve, TIME_BETWEEN_CHECKS))
     }
   }
 }

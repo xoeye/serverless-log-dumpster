@@ -1,5 +1,5 @@
 module.exports = {
-  '*.js': ['prettier-eslint --write', 'jest --findRelatedTests', 'eslint'],
+  '*.js': ['prettier-eslint --write', 'mocha', 'eslint'],
   '*.json': ['prettier --write'],
   '*.md': ['prettier --write'],
 }

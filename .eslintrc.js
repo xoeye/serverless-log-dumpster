@@ -2,7 +2,6 @@ module.exports = {
   root: true,
   env: {
     node: true,
-    jest: true,
     es6: true,
   },
   parserOptions: {
