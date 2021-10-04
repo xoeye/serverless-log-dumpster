@@ -3,6 +3,8 @@
 const templateDiffer = require('./cfnTemplateDiff')
 const { dumpLogGroup } = require('./logDumper')
 
+const LOG_PREFIX = '[LogDumpster]'
+
 class ServerlessPlugin {
   constructor(serverless, options) {
     this.serverless = serverless
@@ -67,15 +69,14 @@ class ServerlessPlugin {
 
     const removed_str = removed.map((group) => group.logGroupName).join(', ')
     this.serverless.cli.log(
-      `LogDumpster found the following log groups to be replaced or removed: ${removed_str}`
+      `${LOG_PREFIX} found the following log groups to be replaced or removed: ${removed_str}`
     )
 
     return removed
   }
 
   async dumpRemovedLogGroups(removedLogGroups) {
-    if (this.serverless.service.provider.shouldNotDeploy) return
-    console.log('removing dumped stuffs woo')
+    if (this.serviceProvider.shouldNotDeploy) return
 
     const cloudWatchMethod = (action) => async (params) =>
       await this.provider.request('CloudWatchLogs', action, params)
@@ -93,11 +94,11 @@ class ServerlessPlugin {
     )
 
     for (const logGroup of removedLogGroups) {
-      this.serverless.cli.log(`[LogDumpster] Starting export of ${logGroup.name}`)
+      this.serverless.cli.log(`${LOG_PREFIX} Starting export of ${logGroup.name}`)
       const exportTime = await dump(logGroup)
-      this.serverless.cli.log(`[LogDumpster] Completed export in ${exportTime} seconds`)
+      this.serverless.cli.log(`${LOG_PREFIX} Completed export in ${exportTime} seconds`)
     }
-    this.serverless.cli.log(`[LogDumpster] Completed dumping all logs`)
+    this.serverless.cli.log(`${LOG_PREFIX} Completed dumping all logs`)
   }
 }
 
