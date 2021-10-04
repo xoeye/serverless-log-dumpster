@@ -11,9 +11,9 @@
     "lint": "eslint src",
     "test": "jest",
     "prepare": "husky install",
-    "demo:create": "cd test-projects/create-log-group && serverless deploy",
-    "demo:delete": "cd test-projects/delete-log-group && serverless deploy",
-    "demo:teardown": "cd test-projects/create-log-group && serverless deploy",
+    "demo:create": "cd demo-projects/create-log-group && serverless deploy",
+    "demo:delete": "cd demo-projects/delete-log-group && serverless deploy",
+    "demo:teardown": "cd demo-projects/create-log-group && serverless deploy",
     "demo": "yarn demo:create && yarn demo:delete; yarn demo:teardown"
   },
   "dependencies": {
