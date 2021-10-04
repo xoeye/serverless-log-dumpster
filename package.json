@@ -16,8 +16,10 @@
     "demo:teardown": "cd test-projects/create-log-group && serverless deploy",
     "demo": "yarn demo:create && yarn demo:delete; yarn demo:teardown"
   },
+  "dependencies": {
+    "@aws-cdk/cloudformation-diff": "^1.124.0"
+  },
   "devDependencies": {
-    "@aws-cdk/cloudformation-diff": "^1.124.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
