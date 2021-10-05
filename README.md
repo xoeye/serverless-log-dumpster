@@ -80,6 +80,17 @@ deletion, changes or replacement to `AWS::Logs::LogGroup` resources, regardless 
 This means that it will export log groups before deletion for _any_ log group specified within the CloudFormation template,
 even if it was created and deleted manually or is managed by another plugin.
 
+## Development and testing
+
+We aim to keep the core of the plugin purely functional to allow great unit test coverage.
+However, you might want to test the plugin directly with Serverless. For this purpose, two
+"demo" projects exist: [`demo-projects/create-log-group/`](./demo-projects/create-log-group/serverless.yml)
+and [`demo-projects/delete-log-group`](./demo-projects/delete-log-group/serverless.yml).
+
+Helper npm scripts exist in package.json, namely: `demo:create`, `demo:log`, `demo:delete`, `demo:teardown` and finally, just running `yarn demo` will run all four sequentially.
+
+Note that these scripts use your OS username (`$(whoami)`) as a suffix for the bucket. You must create the bucket yourself and configure it as specified above.
+
 ## Contributing
 
 We welcome all contributors with open arms! See [CONTRIBUTING.md](./CONTRIBUTING.md)

@@ -20,10 +20,11 @@
     "test": "mocha",
     "test:coverage": "nyc --reporter=lcov mocha",
     "prepare": "husky install",
-    "demo:create": "cd demo-projects/create-log-group && serverless deploy",
-    "demo:delete": "cd demo-projects/delete-log-group && serverless deploy",
-    "demo:teardown": "cd demo-projects/create-log-group && serverless deploy",
-    "demo": "yarn demo:create && yarn demo:delete; yarn demo:teardown"
+    "demo:create": "cd demo-projects/create-log-group && serverless deploy --stage $(whoami)",
+    "demo:log": "cd demo-projects/create-log-group && serverless invoke -f this_function_gets_removed --stage $(whoami)",
+    "demo:delete": "cd demo-projects/delete-log-group && serverless deploy --stage $(whoami)",
+    "demo:teardown": "cd demo-projects/create-log-group && serverless remove --stage $(whoami)",
+    "demo": "yarn demo:create && yarn demo:log && yarn demo:delete; yarn demo:teardown"
   },
   "dependencies": {
     "@aws-cdk/cloudformation-diff": "^1.124.0"

@@ -1,4 +1,4 @@
-service: log-dumpster-integration-test
+service: log-dumpster-demo
 
 frameworkVersion: '2'
 
@@ -6,17 +6,22 @@ plugins:
   - ../../
 
 logDumpster:
-  destinationBucketName: 0logbucket-xavier
-  destinationPathPrefix: cool
+  destinationBucketName: logdumpster-demo-${opt:stage}
+  destinationPathPrefix: logdumpster-exports
+
+package:
+  patterns:
+    - sampleLogger.js
 
 provider:
   name: aws
   runtime: nodejs14.x
   stage: test
-  stackName: log-dumpster-integration-test
+  stackName: log-dumpster-demo
   region: us-east-2
   memorySize: 128
+  lambdaHashingVersion: 20201221 # Suppress warning
 
 functions:
   this_function_stays:
-    handler: handler.handler
+    handler: sampleLogger.handler
