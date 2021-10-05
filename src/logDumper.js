@@ -11,7 +11,9 @@ const waitForExportTask = async (describeExportTasks, taskId) => {
 
     switch (task.status && task.status.code) {
       case 'COMPLETED':
-        return Math.ceil(task.executionInfo.completionTime - task.executionInfo.creationTime / 1000)
+        return Math.ceil(
+          (task.executionInfo.completionTime - task.executionInfo.creationTime) / 1000
+        )
       case 'CANCELLED':
       case 'FAILED':
         throw new Error(
