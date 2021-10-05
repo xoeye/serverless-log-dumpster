@@ -1,0 +1,16 @@
+tests:
+  - test/**/*
+
+core:
+  - src/**/*
+
+dependencies:
+  - yarn.lock
+  - package.json
+
+internal:
+  - CHANGES.md
+  - LICENSE
+
+documentation:
+  - README.md
