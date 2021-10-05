@@ -54,9 +54,26 @@ class ServerlessPlugin {
     this.destinationPathPrefix = config.destinationPathPrefix || 'logDumpster'
   }
 
+  log(str) {
+    this.serverless.cli.log(`${LOG_PREFIX} ${str}`)
+  }
+
   async onBeforeUpdateStack() {
     const removedLogGroups = await this.findRemovedLogGroups()
-    await this.dumpRemovedLogGroups(removedLogGroups)
+    if (removedLogGroups.length > 0) {
+      const removed_str = removedLogGroups.map((group) => group.logGroupName).join(', ')
+
+      this.log(`Found the following log groups to be replaced or removed: ${removed_str}`)
+
+      if (this.serviceProvider.shouldNotDeploy) {
+        this.log('Dry-run was requested, skipping log export.')
+      } else {
+        await this.dumpRemovedLogGroups(removedLogGroups)
+        this.log(`Completed dumping all logs!`)
+      }
+    } else {
+      this.log('No log groups will be removed as a result of this deployment')
+    }
   }
 
   async findRemovedLogGroups() {
@@ -65,14 +82,7 @@ class ServerlessPlugin {
     const deployedTemplate = JSON.parse(resp.TemplateBody)
     const newTemplate = this.serviceProvider.compiledCloudFormationTemplate
 
-    const removed = templateDiffer.findRemovedLogGroups(deployedTemplate, newTemplate)
-
-    const removed_str = removed.map((group) => group.logGroupName).join(', ')
-    this.serverless.cli.log(
-      `${LOG_PREFIX} found the following log groups to be replaced or removed: ${removed_str}`
-    )
-
-    return removed
+    return templateDiffer.findRemovedLogGroups(deployedTemplate, newTemplate)
   }
 
   async dumpRemovedLogGroups(removedLogGroups) {
@@ -94,11 +104,10 @@ class ServerlessPlugin {
     )
 
     for (const logGroup of removedLogGroups) {
-      this.serverless.cli.log(`${LOG_PREFIX} Starting export of ${logGroup.name}`)
+      this.log(`Starting export of ${logGroup.name}`)
       const exportTime = await dump(logGroup)
-      this.serverless.cli.log(`${LOG_PREFIX} Completed export in ${exportTime} seconds`)
+      this.log(`Completed export in ${exportTime} seconds`)
     }
-    this.serverless.cli.log(`${LOG_PREFIX} Completed dumping all logs`)
   }
 }
 
