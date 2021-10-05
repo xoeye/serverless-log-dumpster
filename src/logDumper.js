@@ -35,8 +35,17 @@ const dumpLogGroup = async (
 
   const taskName = `${logGroup.logicalId}-${now}"`
 
-  const nameWithoutPrefix = logGroup.name
-  const exportPath = `${pathPrefix}/${nameWithoutPrefix}`
+  // Leading slash unwanted if exporting to root of bucket
+  const nameWithoutPrefix = logGroup.name.replace(/^\//, '')
+
+  // Remove leading or trailing slashes from configured prefix. Allows '/' or '' as root of bucket
+  let sanitizedPrefix = pathPrefix.replace(/^\//, '').replace(/\/$/, '')
+  if (sanitizedPrefix.length > 0) {
+    // Only append trailing slash if not exporting to root of bucket
+    sanitizedPrefix += '/'
+  }
+
+  const exportPath = `${sanitizedPrefix}${nameWithoutPrefix}`
 
   const createParams = {
     taskName,
