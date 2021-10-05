@@ -33,7 +33,7 @@ const dumpLogGroup = async (
 
   const taskName = `${logGroup.logicalId}-${now}"`
 
-  const nameWithoutPrefix = logGroup.name.replace(/^\/aws\/lambda\//, '')
+  const nameWithoutPrefix = logGroup.name
   const exportPath = `${pathPrefix}/${nameWithoutPrefix}`
 
   const createParams = {
