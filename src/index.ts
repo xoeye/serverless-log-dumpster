@@ -1,16 +1,32 @@
 'use strict'
 
-const templateDiffer = require('./cfnTemplateDiff')
-const { dumpLogGroup } = require('./logDumper')
+import Serverless from 'serverless'
+import Aws from 'serverless/plugins/aws/provider/awsProvider'
+import { diffFindRemovedLogGroups } from './cfnTemplateDiff'
+import { dumpLogGroup } from './logDumper'
+import { AwsApiCall, JSONRepresentable } from './types/awsApi'
+import { LogGroup } from './types/logGroup'
+import { AWSServiceProvider, ServerlessInstance } from './types/serverless'
 
 const LOG_PREFIX = '[LogDumpster]'
 
-class ServerlessPlugin {
-  constructor(serverless, options) {
-    this.serverless = serverless
+export default class LogDumpsterPlugin {
+  serverless: ServerlessInstance
+  options: Serverless.Options
+  provider: Aws
+  serviceProvider: AWSServiceProvider
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hooks: { [key: string]: (...args: any) => any | Promise<any> }
+
+  destinationBucketName: string
+  destinationPathPrefix: string
+
+  constructor(serverless: unknown, options: Serverless.Options) {
+    this.serverless = serverless as ServerlessInstance
     this.options = options
 
-    if (serverless.service.provider.name !== 'aws') {
+    if (this.serverless.service.provider.name !== 'aws') {
       throw new Error("serverless-log-dumpster can only be used with the 'aws' provider")
     }
 
@@ -21,7 +37,7 @@ class ServerlessPlugin {
      */
     this.provider = this.serverless.getProvider('aws')
 
-    this.serviceProvider = serverless.service.provider
+    this.serviceProvider = this.serverless.service.provider as AWSServiceProvider
 
     this.hooks = {
       'before:aws:deploy:deploy:updateStack': this.onBeforeUpdateStack.bind(this),
@@ -36,14 +52,14 @@ class ServerlessPlugin {
       required: ['destinationBucketName', 'destinationPathPrefix'],
     }
 
-    serverless.configSchemaHandler.defineTopLevelProperty('logDumpster', configProperties)
+    this.serverless.configSchemaHandler.defineTopLevelProperty('logDumpster', configProperties)
 
-    const config = serverless.configurationInput.logDumpster
+    const config = this.serverless.configurationInput.logDumpster as JSONRepresentable
     if (!config) {
       throw new Error('Please specify `logDumpster` in your serverless.yml file!')
     }
 
-    this.destinationBucketName = config.destinationBucketName
+    this.destinationBucketName = config.destinationBucketName as string
 
     if (!this.destinationBucketName) {
       throw new Error(
@@ -51,17 +67,17 @@ class ServerlessPlugin {
       )
     }
 
-    this.destinationPathPrefix = config.destinationPathPrefix || 'logDumpster'
+    this.destinationPathPrefix = (config.destinationPathPrefix as string) || 'logDumpster'
   }
 
-  log(str) {
+  log(str: string): void {
     this.serverless.cli.log(`${LOG_PREFIX} ${str}`)
   }
 
-  async onBeforeUpdateStack() {
+  async onBeforeUpdateStack(): Promise<void> {
     const removedLogGroups = await this.findRemovedLogGroups()
     if (removedLogGroups.length > 0) {
-      const removed_str = removedLogGroups.map((group) => group.logGroupName).join(', ')
+      const removed_str = removedLogGroups.map((group) => group.name).join(', ')
 
       this.log(`Found the following log groups to be replaced or removed: ${removed_str}`)
 
@@ -76,22 +92,24 @@ class ServerlessPlugin {
     }
   }
 
-  async findRemovedLogGroups() {
+  async findRemovedLogGroups(): Promise<LogGroup[]> {
     const params = { StackName: this.serviceProvider.stackName, TemplateStage: 'Original' }
     const resp = await this.provider.request('CloudFormation', 'getTemplate', params)
     const deployedTemplate = JSON.parse(resp.TemplateBody)
     const newTemplate = this.serviceProvider.compiledCloudFormationTemplate
 
-    return templateDiffer.findRemovedLogGroups(deployedTemplate, newTemplate)
+    return diffFindRemovedLogGroups(deployedTemplate, newTemplate)
   }
 
-  async dumpRemovedLogGroups(removedLogGroups) {
+  async dumpRemovedLogGroups(removedLogGroups: LogGroup[]): Promise<void> {
     if (this.serviceProvider.shouldNotDeploy) return
 
-    const cloudWatchMethod = (action) => async (params) =>
-      await this.provider.request('CloudWatchLogs', action, params)
+    const cloudWatchMethod =
+      (action: string) =>
+      async (params: JSONRepresentable): Promise<JSONRepresentable> =>
+        await this.provider.request('CloudWatchLogs', action, params)
 
-    const apis = {
+    const apis: Record<string, AwsApiCall<JSONRepresentable, JSONRepresentable>> = {
       createExportTask: cloudWatchMethod('createExportTask'),
       describeExportTasks: cloudWatchMethod('describeExportTasks'),
     }
@@ -111,4 +129,4 @@ class ServerlessPlugin {
   }
 }
 
-module.exports = ServerlessPlugin
+module.exports = LogDumpsterPlugin // happy transpiler now, `export default` isn't equivalent

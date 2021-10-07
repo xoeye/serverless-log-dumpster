@@ -1,23 +1,17 @@
-const assert = require('assert')
-const sinon = require('sinon')
-
-const logDumper = require('../src/logDumper')
-const { AWS_CreateExportTask, make_AWS_DescribeExportTasks } = require('./mocks/awsProvider.mock')
+import assert from 'assert'
+import sinon from 'sinon'
+import { dumpLogGroup } from '../logDumper'
+import { AWS_CreateExportTask, make_AWS_DescribeExportTasks } from './mocks/awsProvider.mock'
 
 describe('log dumper', () => {
   it('makes the proper AWS api calls', async () => {
     const createExportTask = sinon.spy(AWS_CreateExportTask)
     const describeExportTasks = sinon.spy(make_AWS_DescribeExportTasks('COMPLETED'))
 
-    await logDumper.dumpLogGroup(
-      { createExportTask, describeExportTasks },
-      'destbucket',
-      'prefix',
-      {
-        name: 'logGroupname',
-        logicalId: 'LogGroup',
-      }
-    )
+    await dumpLogGroup({ createExportTask, describeExportTasks }, 'destbucket', 'prefix', {
+      name: 'logGroupname',
+      logicalId: 'LogGroup',
+    })
 
     assert(createExportTask.calledOnce)
     assert.equal(describeExportTasks.callCount, 3)
@@ -28,7 +22,7 @@ describe('log dumper', () => {
     const describeExportTasks = sinon.spy(make_AWS_DescribeExportTasks('FAILED'))
 
     await assert.rejects(
-      logDumper.dumpLogGroup({ createExportTask, describeExportTasks }, 'destbucket', 'prefix', {
+      dumpLogGroup({ createExportTask, describeExportTasks }, 'destbucket', 'prefix', {
         name: 'logGroupname',
         logicalId: 'LogGroup',
       }),
@@ -44,7 +38,7 @@ describe('log dumper', () => {
     const describeExportTasks = sinon.spy(make_AWS_DescribeExportTasks('CANCELLED'))
 
     await assert.rejects(
-      logDumper.dumpLogGroup({ createExportTask, describeExportTasks }, 'destbucket', 'prefix', {
+      dumpLogGroup({ createExportTask, describeExportTasks }, 'destbucket', 'prefix', {
         name: 'logGroupname',
         logicalId: 'LogGroup',
       }),

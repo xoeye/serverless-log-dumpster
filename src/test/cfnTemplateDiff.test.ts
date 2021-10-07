@@ -1,6 +1,5 @@
-const assert = require('assert')
-
-const { findRemovedLogGroups } = require('../src/cfnTemplateDiff')
+import assert from 'assert'
+import { diffFindRemovedLogGroups } from '../cfnTemplateDiff'
 
 const templateA = {
   Resources: {
@@ -47,7 +46,7 @@ const emptyTemplate = {
 
 describe('findRemovedLogGroups', () => {
   it('returns removed log groups', () => {
-    const result = findRemovedLogGroups(templateAB, emptyTemplate)
+    const result = diffFindRemovedLogGroups(templateAB, emptyTemplate)
     assert.notStrictEqual(result, [
       { logicalId: 'LogGroupA', name: '/aws/lambda/log-group-a' },
       { logicalId: 'LogGroupB', name: '/aws/lambda/log-group-b' },
@@ -55,17 +54,17 @@ describe('findRemovedLogGroups', () => {
   })
 
   it("doesn't return renamed log groups", () => {
-    const result = findRemovedLogGroups(templateA, templateARenamed)
+    const result = diffFindRemovedLogGroups(templateA, templateARenamed)
     assert.notStrictEqual(result, [])
   })
 
   it("returns nothing if log groups haven't changed", () => {
-    const result = findRemovedLogGroups(templateA, templateA)
+    const result = diffFindRemovedLogGroups(templateA, templateA)
     assert.notStrictEqual(result, [])
   })
 
   it("doesn't return new log groups", () => {
-    const result = findRemovedLogGroups(emptyTemplate, templateA)
+    const result = diffFindRemovedLogGroups(emptyTemplate, templateA)
     assert.notStrictEqual(result, [])
   })
 })

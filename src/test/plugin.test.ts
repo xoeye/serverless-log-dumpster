@@ -1,15 +1,14 @@
-const assert = require('assert')
+import assert from 'assert'
+import LogDumpsterPlugin from '../index'
+import { sampleTemplate } from './mocks/awsProvider.mock'
+import { MockServerless } from './mocks/serverless.mock'
 
-const { sampleTemplate } = require('./mocks/awsProvider.mock')
-
-const { MockServerless } = require('./mocks/serverless.mock')
-const ServerlessPlugin = require('../src/index')
+const DUMMY_OPTIONS = { stage: 'unittest', region: 'outer-space' }
 
 describe('serverless plugin log dumping', () => {
-  it('dump logs if log group is removed from stack', async () => {
+  it('dumps logs if log group is removed from stack', async () => {
     const serverless = new MockServerless()
-    const plugin = new ServerlessPlugin(serverless, {})
-
+    const plugin = new LogDumpsterPlugin(serverless as unknown, DUMMY_OPTIONS)
     await plugin.onBeforeUpdateStack()
 
     const createExportTask = serverless.providers.aws.services.CloudWatchLogs.createExportTask
@@ -18,7 +17,7 @@ describe('serverless plugin log dumping', () => {
 
   it("doesn't dump logs if shouldNotDeploy == true", async () => {
     const serverless = new MockServerless()
-    const plugin = new ServerlessPlugin(serverless, {})
+    const plugin = new LogDumpsterPlugin(serverless as unknown, DUMMY_OPTIONS)
     serverless.setShouldNotDeploy(true)
 
     await plugin.onBeforeUpdateStack()
@@ -31,7 +30,7 @@ describe('serverless plugin log dumping', () => {
     const serverless = new MockServerless()
     serverless.service.provider.compiledCloudFormationTemplate = sampleTemplate
 
-    const plugin = new ServerlessPlugin(serverless, {})
+    const plugin = new LogDumpsterPlugin(serverless as unknown, DUMMY_OPTIONS)
 
     await plugin.onBeforeUpdateStack()
 
@@ -46,7 +45,7 @@ describe('plugin configuration and usage', () => {
     serverless.service.provider.name = 'not_aws'
 
     assert.throws(() => {
-      new ServerlessPlugin(serverless, {})
+      new LogDumpsterPlugin(serverless as unknown, DUMMY_OPTIONS)
     }, /only be used with the 'aws' provider/)
   })
 
@@ -55,7 +54,7 @@ describe('plugin configuration and usage', () => {
     serverless.configurationInput = {}
 
     assert.throws(() => {
-      new ServerlessPlugin(serverless, {})
+      new LogDumpsterPlugin(serverless as unknown, DUMMY_OPTIONS)
     }, /Please specify `logDumpster`/)
   })
 
@@ -66,7 +65,7 @@ describe('plugin configuration and usage', () => {
     }
 
     assert.throws(() => {
-      new ServerlessPlugin(serverless, {})
+      new LogDumpsterPlugin(serverless as unknown, DUMMY_OPTIONS)
     }, /Please specify `logDumpster.destinationBucketName`/)
   })
 })

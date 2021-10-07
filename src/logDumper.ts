@@ -1,10 +1,13 @@
-const ctime = () => Math.floor(new Date().getTime())
+import { CloudWatchLogsApi, CreateExportTaskParams, DescribeExportTasks } from './types/awsApi'
+import { LogGroup } from './types/logGroup'
 
-const runningUnitTests = () => ['it', 'describe'].every((fn) => global[fn] instanceof Function)
+const runningUnitTests = (): boolean =>
+  ['it', 'describe'].every((fn) => (global as Record<string, unknown>)[fn] instanceof Function)
 
 const TIME_BETWEEN_CHECKS = runningUnitTests() ? 5 : 5 * 1000
 
-const waitForExportTask = async (describeExportTasks, taskId) => {
+const waitForExportTask = async (describeExportTasks: DescribeExportTasks, taskId: string) => {
+  /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
   while (true) {
     const resp = await describeExportTasks({ taskId })
     const task = resp.exportTasks[0]
@@ -25,12 +28,12 @@ const waitForExportTask = async (describeExportTasks, taskId) => {
   }
 }
 
-const dumpLogGroup = async (
-  { createExportTask, describeExportTasks },
-  bucketName,
-  pathPrefix,
-  logGroup
-) => {
+export const dumpLogGroup = async (
+  { createExportTask, describeExportTasks }: CloudWatchLogsApi,
+  bucketName: string,
+  pathPrefix: string,
+  logGroup: LogGroup
+): Promise<number> => {
   const now = Date.now()
 
   const taskName = `${logGroup.logicalId}-${now}"`
@@ -47,7 +50,7 @@ const dumpLogGroup = async (
 
   const exportPath = `${sanitizedPrefix}${nameWithoutPrefix}`
 
-  const createParams = {
+  const createParams: CreateExportTaskParams = {
     taskName,
     logGroupName: logGroup.name,
     destination: bucketName,
@@ -62,5 +65,3 @@ const dumpLogGroup = async (
 
   return exportTime
 }
-
-module.exports.dumpLogGroup = dumpLogGroup

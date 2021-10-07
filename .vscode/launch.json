@@ -10,7 +10,7 @@
       "name": "Debug demo:create",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/node_modules/serverless/bin/serverless.js",
-      "cwd": "${workspaceFolder}/test-projects/create-log-group",
+      "cwd": "${workspaceFolder}/demo-projects/create-log-group",
       "args": ["deploy"],
       "outputCapture": "std"
     },
@@ -20,7 +20,7 @@
       "name": "Debug demo:delete",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/node_modules/serverless/bin/serverless.js",
-      "cwd": "${workspaceFolder}/test-projects/delete-log-group",
+      "cwd": "${workspaceFolder}/demo-projects/delete-log-group",
       "args": ["deploy"],
       "outputCapture": "std"
     }
