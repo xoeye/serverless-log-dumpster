@@ -796,11 +796,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/serverless@^1.78.35":
-  version "1.78.35"
-  resolved "https://registry.yarnpkg.com/@types/serverless/-/serverless-1.78.35.tgz#62b9d19448a5cd99450a35d870a24a477e2b0889"
-  integrity sha512-7taAYj0PZyHrgElIfF4fghPru/0ZJ6i+FjYZ71QQjeL1++C7InZiegIQ5LW9pRytKDsbECocgkGhUVnk55nKWQ==
-
 "@types/sinon@^10.0.4":
   version "10.0.4"
   resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-10.0.4.tgz#9332527665692b9f6826afe017f342a3ac6120f4"

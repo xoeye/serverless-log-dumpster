@@ -1,30 +1,24 @@
-'use strict'
-
-import Serverless from 'serverless'
-import Aws from 'serverless/plugins/aws/provider/awsProvider'
 import { diffFindRemovedLogGroups } from './cfnTemplateDiff'
 import { dumpLogGroup } from './logDumper'
 import { AwsApiCall, JSONRepresentable } from './types/awsApi'
 import { LogGroup } from './types/logGroup'
-import { AWSServiceProvider, ServerlessInstance } from './types/serverless'
+import { AWSProvider, AWSServiceProvider, Serverless } from './types/serverless'
 
 const LOG_PREFIX = '[LogDumpster]'
 
 export default class LogDumpsterPlugin {
-  serverless: ServerlessInstance
-  options: Serverless.Options
-  provider: Aws
+  serverless: Serverless
+  provider: AWSProvider
   serviceProvider: AWSServiceProvider
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hooks: { [key: string]: (...args: any) => any | Promise<any> }
 
   destinationBucketName: string
   destinationPathPrefix: string
 
-  constructor(serverless: unknown, options: Serverless.Options) {
-    this.serverless = serverless as ServerlessInstance
-    this.options = options
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(serverless: Serverless, _options: unknown) {
+    this.serverless = serverless
 
     if (this.serverless.service.provider.name !== 'aws') {
       throw new Error("serverless-log-dumpster can only be used with the 'aws' provider")
@@ -95,7 +89,7 @@ export default class LogDumpsterPlugin {
   async findRemovedLogGroups(): Promise<LogGroup[]> {
     const params = { StackName: this.serviceProvider.stackName, TemplateStage: 'Original' }
     const resp = await this.provider.request('CloudFormation', 'getTemplate', params)
-    const deployedTemplate = JSON.parse(resp.TemplateBody)
+    const deployedTemplate = JSON.parse(resp.TemplateBody as string)
     const newTemplate = this.serviceProvider.compiledCloudFormationTemplate
 
     return diffFindRemovedLogGroups(deployedTemplate, newTemplate)

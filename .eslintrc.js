@@ -15,4 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'warn',
+  },
 }

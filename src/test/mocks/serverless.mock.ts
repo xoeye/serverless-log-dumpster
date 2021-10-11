@@ -1,58 +1,43 @@
-import assert from 'assert'
-import sinon from 'sinon'
+import Sinon from 'sinon'
+import { Serverless } from '../../types/serverless'
 import { MockAWSProvider } from './awsProvider.mock'
-type LogDumpsterConfiguration = {
-  logDumpster?: {
-    destinationBucketName?: string
-    destinationPathPrefix?: string
-  }
-}
 
-export class MockServerless {
-  cli = { log: sinon.fake() }
-  public service = {
-    provider: {
-      name: 'aws',
-      shouldNotDeploy: false,
-      stackName: 'cool-test-stack',
-      compiledCloudFormationTemplate: {
-        Resources: {},
+export const MockServerless = (): Serverless => {
+  const awsProvider = new MockAWSProvider()
+  return {
+    service: {
+      provider: {
+        name: 'aws',
+        shouldNotDeploy: false,
+        stackName: 'cool-test-stack',
+        compiledCloudFormationTemplate: {
+          Resources: {},
+        },
       },
     },
-  }
 
-  configSchemaHandler = {
-    defineTopLevelProperty: sinon.fake(),
+    providers: {
+      aws: awsProvider,
+    },
 
-    defineCustomProperties: sinon.fake(),
-    defineFunctionEvent: sinon.fake(),
-    defineFunctionEventProperties: sinon.fake(),
-    defineFunctionProperties: sinon.fake(),
-    defineProvider: sinon.fake(),
-  }
+    getProvider(str: string) {
+      if (str !== 'aws') {
+        throw new Error(`mock getProvider not implemented for provider ${str}`)
+      }
+      return awsProvider
+    },
 
-  providers: { [key: string]: MockAWSProvider } = {
-    aws: new MockAWSProvider(),
-  }
+    cli: {
+      log: Sinon.fake(),
+    },
 
-  configurationInput: LogDumpsterConfiguration
-  constructor() {
-    this.configurationInput = {
+    configSchemaHandler: { defineTopLevelProperty: Sinon.fake() },
+
+    configurationInput: {
       logDumpster: {
         destinationBucketName: 'destinationBucket',
         destinationPathPrefix: 'logDumpster',
       },
-    }
-  }
-
-  setShouldNotDeploy(shouldNotDeploy: boolean): void {
-    this.service.provider.shouldNotDeploy = shouldNotDeploy
-  }
-
-  getProvider(name: string): MockAWSProvider {
-    assert.notEqual(this.providers[name], undefined)
-    return this.providers[name]
+    },
   }
 }
-
-module.exports = { MockServerless }

@@ -26,7 +26,7 @@ export type CreateExportTask = AwsApiCall<CreateExportTaskParams, CreateExportTa
 /**
  * CloudWatchLogs::DescribeExportTasks
  */
-interface DescribeExportTasksParams {
+export interface DescribeExportTasksParams {
   taskId: string
   statusCode?: string
 }
