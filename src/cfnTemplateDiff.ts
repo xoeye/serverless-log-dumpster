@@ -1,7 +1,7 @@
 import { diffTemplate, PropertyMap, ResourceDifference } from '@aws-cdk/cloudformation-diff'
 import { LogGroup } from './types/logGroup'
 
-const isLogGroup = (change: ResourceDifference): boolean =>
+export const isLogGroup = (change: ResourceDifference): boolean =>
   change.oldResourceType == 'AWS::Logs::LogGroup'
 
 const isRemovedLogGroup = (change: ResourceDifference): boolean =>

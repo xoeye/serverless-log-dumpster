@@ -1,5 +1,6 @@
+import { diffTemplate } from '@aws-cdk/cloudformation-diff'
 import assert from 'assert'
-import { diffFindRemovedLogGroups } from '../cfnTemplateDiff'
+import { diffFindRemovedLogGroups, isLogGroup } from '../cfnTemplateDiff'
 
 const templateA = {
   Resources: {
@@ -7,6 +8,12 @@ const templateA = {
       Type: 'AWS::Logs::LogGroup',
       Properties: {
         LogGroupName: '/aws/lambda/log-group-a',
+      },
+    },
+    NotALogGroup: {
+      Type: 'AWS::S3::Bucket',
+      Properties: {
+        BucketName: 'FakeBucket',
       },
     },
   },
@@ -66,5 +73,17 @@ describe('findRemovedLogGroups', () => {
   it("doesn't return new log groups", () => {
     const result = diffFindRemovedLogGroups(emptyTemplate, templateA)
     assert.notStrictEqual(result, [])
+  })
+})
+
+describe('isLogGroup', () => {
+  it('returns true if old resource type was log group', () => {
+    const diff = diffTemplate(templateA, templateARenamed)
+    assert(isLogGroup(diff.resources.get('LogGroupA')))
+  })
+
+  it('returns false if old resource type was not log group', () => {
+    const diff = diffTemplate(templateA, templateARenamed)
+    assert(!isLogGroup(diff.resources.get('NotALogGroup')))
   })
 })
