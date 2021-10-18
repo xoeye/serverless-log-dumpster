@@ -1,0 +1,43 @@
+name: Publish
+
+# RELEASE PROCESS
+#
+# === Manual ===
+#
+# 1. Document human readable changes in CHANGES.md
+# 2. Bump package version
+# 3. Merge into `main` branch
+# 4. Go to "Releases" tab and edit the latest draft
+# 5. Ensure Git tag matches latest version and that the release notes are appropriate
+# 6. Publish the release and monitor CI for success
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    environment: xoi-npm
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Ensure new version is also set in CHANGES.md
+        run: grep --regexp "${{ github.event.release.name }}" CHANGES.md
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+
+      - run: yarn build
+
+      - run: yarn test
+
+      - run: yarn publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

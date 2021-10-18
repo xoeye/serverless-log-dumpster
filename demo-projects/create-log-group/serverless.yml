@@ -1,0 +1,29 @@
+service: log-dumpster-demo
+
+frameworkVersion: '2'
+
+plugins:
+  - ../../
+
+logDumpster:
+  destinationBucketName: logdumpster-demo-${opt:stage}
+  destinationPathPrefix: logdumpster-exports
+
+package:
+  patterns:
+    - sampleLogger.js
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: test
+  stackName: log-dumpster-demo
+  region: us-east-2
+  memorySize: 128
+  lambdaHashingVersion: 20201221 # Suppress warning
+
+functions:
+  this_function_stays:
+    handler: sampleLogger.handler
+  this_function_gets_removed:
+    handler: sampleLogger.handler

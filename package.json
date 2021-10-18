@@ -1,0 +1,66 @@
+{
+  "name": "@xoi/serverless-log-dumpster",
+  "version": "0.1.0",
+  "description": "Serverless Framework plugin to archive AWS CloudWatch log groups before deletion",
+  "main": "dist/index.js",
+  "repository": "git@github.com:xoeye/serverless-log-dumpster.git",
+  "homepage": "https://github.com/xoeye/serverless-log-dumpster",
+  "bugs": {
+    "url": "https://github.com/xoeye/serverless-log-dumpster/issues",
+    "email": "xbergeron@xoi.io"
+  },
+  "author": "Xavier Bergeron <xavbergeron@gmail.com>",
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "pre-commit": "lint-staged",
+    "lint": "eslint src",
+    "build": "rm -rf dist && tsc",
+    "test": "mocha src",
+    "test:coverage": "nyc --reporter=lcov mocha",
+    "prepare": "husky install",
+    "demo:create": "cd demo-projects/create-log-group && serverless deploy --stage $(whoami)",
+    "demo:log": "cd demo-projects/create-log-group && serverless invoke -f this_function_gets_removed --stage $(whoami)",
+    "demo:delete": "cd demo-projects/delete-log-group && serverless deploy --stage $(whoami)",
+    "demo:teardown": "cd demo-projects/create-log-group && serverless remove --stage $(whoami)",
+    "demo": "yarn build && yarn demo:create && yarn demo:log && yarn demo:delete; yarn demo:teardown"
+  },
+  "dependencies": {
+    "@aws-cdk/cloudformation-diff": "^1.124.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.0.0",
+    "@types/sinon": "^10.0.4",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.0",
+    "lint-staged": "^11.1.2",
+    "mocha": "^9.1.2",
+    "nyc": "^15.1.0",
+    "prettier": "^2.4.1",
+    "prettier-eslint-cli": "^5.0.1",
+    "serverless": "^2.60.1",
+    "sinon": "^11.1.2",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  },
+  "peerDependencies": {
+    "serverless": ">= 1.15.0 <3"
+  },
+  "engines": {
+    "node": ">=12.0"
+  },
+  "keywords": [
+    "serverless",
+    "sls",
+    "aws",
+    "cloudwatch",
+    "log groups",
+    "logs"
+  ]
+}

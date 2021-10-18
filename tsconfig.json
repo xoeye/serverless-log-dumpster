@@ -1,0 +1,14 @@
+{
+  "include": ["src"],
+  "exclude": ["src/test"],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "target": "ES2016",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "strictFunctionTypes": true
+  }
+}
