@@ -3,7 +3,7 @@
 **Serverless plugin that archives CloudWatch Log Groups before their deletion**
 
 ![npm Version badge](https://img.shields.io/npm/v/@xoi/serverless-log-dumpster)
-![unit tests badge](https://img.shields.io/github/workflow/status/xoeye/serverless-log-dumpster/unit-test?label=unit%20tests)
+[![Unit Tests](https://github.com/xoeye/serverless-log-dumpster/actions/workflows/unit-test.yml/badge.svg)](https://github.com/xoeye/serverless-log-dumpster/actions/workflows/unit-test.yml)
 
 ## Usage
 
