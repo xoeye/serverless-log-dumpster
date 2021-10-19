@@ -49,7 +49,7 @@
    region: us-east-2
 
    plugins:
-     - @xoi/serverless-log-dumpster
+     - '@xoi/serverless-log-dumpster'
 
    logDumpster:
      destinationBucketName: example-logdumpster-bucket
