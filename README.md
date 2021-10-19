@@ -17,7 +17,7 @@
    on how to do so or view the bucket policy below
 
    <details>
-     <summary>Or click to expand bucket policy </summary>
+     <summary>Click to expand bucket policy </summary>
 
    ```json
    {
