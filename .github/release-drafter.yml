@@ -22,7 +22,8 @@ categories:
       - 'deprecated'
 exclude-labels:
   - 'skip-changelog'
-tag-template: 'v$NEXT_PATCH_VERSION'
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
 template: |
   ## Changes
   $CHANGES

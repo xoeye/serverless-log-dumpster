@@ -9,6 +9,13 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
+      - id: get-version
+        run: echo "::set-output name=version::$(jq .version -r package.json)"
+
       - uses: release-drafter/release-drafter@v5
+        with:
+          version: ${{ steps.get-version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

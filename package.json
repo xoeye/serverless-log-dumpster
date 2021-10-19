@@ -1,6 +1,6 @@
 {
   "name": "@xoi/serverless-log-dumpster",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Serverless Framework plugin to archive AWS CloudWatch log groups before deletion",
   "main": "dist/index.js",
   "repository": "git@github.com:xoeye/serverless-log-dumpster.git",
