@@ -4,6 +4,7 @@
 
 ![npm Version badge](https://img.shields.io/npm/v/@xoi/serverless-log-dumpster)
 [![Unit Tests](https://github.com/xoeye/serverless-log-dumpster/actions/workflows/unit-test.yml/badge.svg)](https://github.com/xoeye/serverless-log-dumpster/actions/workflows/unit-test.yml)
+[![codecov](https://codecov.io/gh/xoeye/serverless-log-dumpster/branch/main/graph/badge.svg?token=dekQZXtGK6)](https://codecov.io/gh/xoeye/serverless-log-dumpster)
 
 ## Usage
 
@@ -17,7 +18,7 @@
    on how to do so or view the bucket policy below
 
    <details>
-     <summary>Or click to expand bucket policy </summary>
+     <summary>Click to expand bucket policy </summary>
 
    ```json
    {
@@ -49,7 +50,7 @@
    region: us-east-2
 
    plugins:
-     - @xoi/serverless-log-dumpster
+     - '@xoi/serverless-log-dumpster'
 
    logDumpster:
      destinationBucketName: example-logdumpster-bucket
