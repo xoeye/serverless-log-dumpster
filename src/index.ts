@@ -90,7 +90,9 @@ export default class LogDumpsterPlugin {
     const params = { StackName: this.serviceProvider.stackName, TemplateStage: 'Original' }
     const resp = await this.provider.request('CloudFormation', 'getTemplate', params)
     const deployedTemplate = JSON.parse(resp.TemplateBody as string)
-    const newTemplate = this.serviceProvider.compiledCloudFormationTemplate
+    const newTemplate = JSON.parse(
+      JSON.stringify(this.serviceProvider.compiledCloudFormationTemplate)
+    )
 
     return diffFindRemovedLogGroups(deployedTemplate, newTemplate)
   }

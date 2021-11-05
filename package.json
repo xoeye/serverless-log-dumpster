@@ -1,6 +1,6 @@
 {
   "name": "@xoi/serverless-log-dumpster",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Serverless Framework plugin to archive AWS CloudWatch log groups before deletion",
   "main": "dist/index.js",
   "repository": "git@github.com:xoeye/serverless-log-dumpster.git",
@@ -28,7 +28,7 @@
     "demo": "yarn build && yarn demo:create && yarn demo:log && yarn demo:delete; yarn demo:teardown"
   },
   "dependencies": {
-    "@aws-cdk/cloudformation-diff": "^1.124.0"
+    "@aws-cdk/cloudformation-diff": "^1.130.0"
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
