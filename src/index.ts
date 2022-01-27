@@ -1,3 +1,4 @@
+import { inspect } from 'util'
 import { diffFindRemovedLogGroups } from './cfnTemplateDiff'
 import { dumpLogGroup } from './logDumper'
 import { AwsApiCall, JSONRepresentable } from './types/awsApi'
@@ -64,8 +65,11 @@ export default class LogDumpsterPlugin {
     this.destinationPathPrefix = (config.destinationPathPrefix as string) || 'logDumpster'
   }
 
-  log(str: string): void {
-    this.serverless.cli.log(`${LOG_PREFIX} ${str}`)
+  log(str: string, ...objects: unknown[]): void {
+    let objects_str = objects.map((e) => inspect(e, { colors: true })).join('\n')
+    if (objects_str.length > 0) objects_str = '\n' + objects_str
+
+    this.serverless.cli.log(`${LOG_PREFIX} ${str}${objects_str}`)
   }
 
   async onBeforeUpdateStack(): Promise<void> {
@@ -116,7 +120,7 @@ export default class LogDumpsterPlugin {
     )
 
     for (const logGroup of removedLogGroups) {
-      this.log(`Starting export of ${logGroup.name}`)
+      this.log(`Starting export of ${logGroup.name}`, logGroup)
       const exportTime = await dump(logGroup)
       this.log(`Completed export in ${exportTime} seconds`)
     }
