@@ -40,9 +40,10 @@ describe('serverless plugin log dumping', () => {
 
     const logGroupPath = '/aws/appsync/apis/log-group-b-nonexistant'
     const logicalToPhysical = { 'log-group-b-nonexistant': logGroupPath }
-    plugin.populatePhysicalIds(logGroups, logicalToPhysical)
+    const newLogGroups = plugin.populatePhysicalIds(logGroups, logicalToPhysical)
 
-    assert.equal(logGroups[0].name, logGroupPath)
+    assert.notEqual(logGroups[0].name, newLogGroups[0].name)
+    assert.equal(newLogGroups[0].name, logGroupPath)
   })
 
   it('throw an error if physical ID cannot be found', async () => {

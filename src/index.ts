@@ -117,7 +117,11 @@ export default class LogDumpsterPlugin {
     return logicalToPhysical
   }
 
-  populatePhysicalIds(logGroups: LogGroup[], logicalToPhysical: Record<string, string>): void {
+  populatePhysicalIds(
+    _logGroups: LogGroup[],
+    logicalToPhysical: Record<string, string>
+  ): LogGroup[] {
+    const logGroups: LogGroup[] = JSON.parse(JSON.stringify(_logGroups))
     for (const logGroup of logGroups) {
       if (typeof logGroup.name != 'string') {
         this.log(`Log group name is defined by instrinsic function:`, logGroup)
@@ -131,6 +135,7 @@ export default class LogDumpsterPlugin {
         }
       }
     }
+    return logGroups
   }
 
   async findRemovedLogGroups(): Promise<LogGroup[]> {
@@ -144,9 +149,7 @@ export default class LogDumpsterPlugin {
     const logicalToPhysical = await this.fetchCurrentStackResources()
 
     const logGroups = diffFindRemovedLogGroups(deployedTemplate, newTemplate)
-    this.populatePhysicalIds(logGroups, logicalToPhysical)
-
-    return logGroups
+    return this.populatePhysicalIds(logGroups, logicalToPhysical)
   }
 
   async dumpRemovedLogGroups(removedLogGroups: LogGroup[]): Promise<void> {
