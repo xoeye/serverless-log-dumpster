@@ -1,9 +1,24 @@
 import assert from 'assert'
-import LogDumpsterPlugin from '../index'
+import LogDumpsterPlugin, { PhysicalIDNotFoundError } from '../index'
 import { MockAWSProvider, sampleTemplate } from './mocks/awsProvider.mock'
 import { MockServerless } from './mocks/serverless.mock'
 
 const DUMMY_OPTIONS = { stage: 'unittest', region: 'outer-space' }
+
+const sampleLogGroup = () => ({
+  logicalId: 'log-group-b-nonexistant',
+  name: {
+    'Fn::Join': [
+      '/',
+      [
+        '/aws/appsync/apis',
+        {
+          'Fn::GetAtt': ['TestAPILogicalResource', 'ApiId'],
+        },
+      ],
+    ],
+  },
+})
 
 describe('serverless plugin log dumping', () => {
   it('dumps logs if log group is removed from stack', async () => {
@@ -14,7 +29,29 @@ describe('serverless plugin log dumping', () => {
     const providers = serverless.providers
     const awsProvider = providers.aws as MockAWSProvider
     const createExportTask = awsProvider.services.CloudWatchLogs.createExportTask
-    assert(createExportTask.calledOnce)
+    assert(createExportTask.calledTwice)
+  })
+
+  it('correctly associates physical ID', async () => {
+    const serverless = MockServerless()
+    const plugin = new LogDumpsterPlugin(serverless, DUMMY_OPTIONS)
+
+    const logGroups = [sampleLogGroup()]
+
+    const logGroupPath = '/aws/appsync/apis/log-group-b-nonexistant'
+    const logicalToPhysical = { 'log-group-b-nonexistant': logGroupPath }
+    plugin.populatePhysicalIds(logGroups, logicalToPhysical)
+
+    assert.equal(logGroups[0].name, logGroupPath)
+  })
+
+  it('throw an error if physical ID cannot be found', async () => {
+    const serverless = MockServerless()
+    const plugin = new LogDumpsterPlugin(serverless, DUMMY_OPTIONS)
+
+    const logGroups = [sampleLogGroup()]
+
+    assert.throws(plugin.populatePhysicalIds.bind(plugin, logGroups, {}), PhysicalIDNotFoundError)
   })
 
   it("doesn't dump logs if shouldNotDeploy == true", async () => {

@@ -11,6 +11,8 @@ import {
   GetTemplateParams,
   GetTemplateResult,
   JSONRepresentable,
+  ListStackResourcesParams,
+  ListStackResourcesResult,
 } from '../../types/awsApi'
 
 export const sampleTemplate = {
@@ -19,6 +21,22 @@ export const sampleTemplate = {
       Type: 'AWS::Logs::LogGroup',
       Properties: {
         LogGroupName: '/aws/lambda/log-group-a',
+      },
+    },
+    LogGroupB: {
+      Type: 'AWS::Logs::LogGroup',
+      Properties: {
+        LogGroupName: {
+          'Fn::Join': [
+            '/',
+            [
+              '/aws/appsync/apis',
+              {
+                'Fn::GetAtt': ['TestAPILogicalResource', 'ApiId'],
+              },
+            ],
+          ],
+        },
       },
     },
   },
@@ -34,6 +52,18 @@ export class MockCloudFormation {
   getTemplate(_params: GetTemplateParams): Promise<GetTemplateResult> {
     return ResolvedPromise<GetTemplateResult>({
       TemplateBody: JSON.stringify(sampleTemplate),
+    })
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  listStackResources(_params: ListStackResourcesParams): Promise<ListStackResourcesResult> {
+    return ResolvedPromise<ListStackResourcesResult>({
+      StackResourceSummaries: [
+        {
+          LogicalResourceId: 'LogGroupB',
+          PhysicalResourceId: '/aws/appsync/apis/log-group-b',
+          ResourceType: 'AWS::Logs::LogGroup',
+        },
+      ],
     })
   }
 }

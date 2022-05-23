@@ -1,6 +1,14 @@
+export type JSONObject =
+  | string
+  | number
+  | boolean
+  | { [name: string]: JSONObject }
+  | Array<JSONObject>
+
 export interface JSONRepresentable {
-  [name: string | symbol]: string | number | JSONRepresentable
+  [name: string | symbol | number]: string | number | boolean | JSONObject
 }
+
 export type AwsApiCall<TParams, TRes> = (params: TParams) => Promise<TRes>
 
 /**
@@ -93,4 +101,21 @@ export type GetTemplate = AwsApiCall<GetTemplateParams, GetTemplateResult>
  */
 export interface CloudFormationApi {
   getTemplate: GetTemplate
+}
+
+/**
+ * Cloudformation::ListResources
+ */
+export interface ListStackResourcesParams {
+  StackName: string
+}
+
+export interface StackResource {
+  LogicalResourceId: string
+  PhysicalResourceId: string
+  ResourceType: string
+}
+
+export interface ListStackResourcesResult {
+  StackResourceSummaries: Array<StackResource>
 }
