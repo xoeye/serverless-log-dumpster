@@ -1,11 +1,21 @@
 import { inspect } from 'util'
 import { diffFindRemovedLogGroups } from './cfnTemplateDiff'
 import { dumpLogGroup } from './logDumper'
-import { AwsApiCall, JSONRepresentable } from './types/awsApi'
+import { AwsApiCall, JSONRepresentable, ListStackResourcesResult } from './types/awsApi'
 import { LogGroup } from './types/logGroup'
 import { AWSProvider, AWSServiceProvider, Serverless } from './types/serverless'
 
 const LOG_PREFIX = '[LogDumpster]'
+
+export class PhysicalIDNotFoundError extends Error {
+  constructor(logGroup: LogGroup) {
+    const logGroupStr = inspect(logGroup, {
+      colors: true,
+      depth: null,
+    })
+    super(`Failed to get physical ID for log group: ${logGroupStr}`)
+  }
+}
 
 export default class LogDumpsterPlugin {
   serverless: Serverless
@@ -66,7 +76,7 @@ export default class LogDumpsterPlugin {
   }
 
   log(str: string, ...objects: unknown[]): void {
-    let objects_str = objects.map((e) => inspect(e, { colors: true })).join('\n')
+    let objects_str = objects.map((e) => inspect(e, { colors: true, depth: null })).join('\n')
     if (objects_str.length > 0) objects_str = '\n' + objects_str
 
     this.serverless.cli.log(`${LOG_PREFIX} ${str}${objects_str}`)
@@ -75,9 +85,9 @@ export default class LogDumpsterPlugin {
   async onBeforeUpdateStack(): Promise<void> {
     const removedLogGroups = await this.findRemovedLogGroups()
     if (removedLogGroups.length > 0) {
-      const removed_str = removedLogGroups.map((group) => group.name).join(', ')
+      const removed_names = removedLogGroups.map((group) => group.name)
 
-      this.log(`Found the following log groups to be replaced or removed: ${removed_str}`)
+      this.log('Found the following log groups to be replaced or removed:', ...removed_names)
 
       if (this.serviceProvider.shouldNotDeploy) {
         this.log('Dry-run was requested, skipping log export.')
@@ -90,6 +100,44 @@ export default class LogDumpsterPlugin {
     }
   }
 
+  async fetchCurrentStackResources(): Promise<Record<string, string>> {
+    const params = { StackName: this.serviceProvider.stackName }
+    const physicalIds = (await this.provider.request(
+      'CloudFormation',
+      'listStackResources',
+      params
+    )) as unknown as ListStackResourcesResult
+
+    const logicalToPhysical: Record<string, string> = {}
+    for (const resource of physicalIds.StackResourceSummaries) {
+      logicalToPhysical[resource.LogicalResourceId] = resource.PhysicalResourceId
+    }
+    this.log('Obtained current resources from deployed stack.')
+
+    return logicalToPhysical
+  }
+
+  populatePhysicalIds(
+    _logGroups: LogGroup[],
+    logicalToPhysical: Record<string, string>
+  ): LogGroup[] {
+    const logGroups: LogGroup[] = JSON.parse(JSON.stringify(_logGroups))
+    for (const logGroup of logGroups) {
+      if (typeof logGroup.name != 'string') {
+        this.log(`Log group name is defined by instrinsic function:`, logGroup)
+
+        const physicalId = logicalToPhysical[logGroup.logicalId]
+        if (physicalId) {
+          this.log(`Using physical ID from ListResources: ${physicalId}`)
+          logGroup.name = physicalId
+        } else {
+          throw new PhysicalIDNotFoundError(logGroup)
+        }
+      }
+    }
+    return logGroups
+  }
+
   async findRemovedLogGroups(): Promise<LogGroup[]> {
     const params = { StackName: this.serviceProvider.stackName, TemplateStage: 'Original' }
     const resp = await this.provider.request('CloudFormation', 'getTemplate', params)
@@ -98,7 +146,10 @@ export default class LogDumpsterPlugin {
       JSON.stringify(this.serviceProvider.compiledCloudFormationTemplate)
     )
 
-    return diffFindRemovedLogGroups(deployedTemplate, newTemplate)
+    const logicalToPhysical = await this.fetchCurrentStackResources()
+
+    const logGroups = diffFindRemovedLogGroups(deployedTemplate, newTemplate)
+    return this.populatePhysicalIds(logGroups, logicalToPhysical)
   }
 
   async dumpRemovedLogGroups(removedLogGroups: LogGroup[]): Promise<void> {
@@ -122,7 +173,7 @@ export default class LogDumpsterPlugin {
     )
 
     for (const logGroup of removedLogGroups) {
-      this.log(`Starting export of ${logGroup.name}`, logGroup)
+      this.log(`Starting export of ${logGroup.name}`)
       const exportTime = await dump(logGroup)
       this.log(`Completed export in ${exportTime} seconds`)
     }
