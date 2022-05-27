@@ -1,4 +1,5 @@
-# v1.0.2
+# v1.0.3
+
 - Fix runtime error when log group names are defined through CF intrinsic functions
 - Bump follow-redirects from 1.14.4 to 1.14.7
 - Output log group for debugging purposes
