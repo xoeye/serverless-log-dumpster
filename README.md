@@ -1,3 +1,7 @@
+# Archived
+
+This plugin has the potential to hang for a long time during export of large log groups. View our new plugin [serverless-log-keeper](https://github.com/xoeye/serverless-log-keeper) which leverages `DeletionPolicy: Retain` to actually _keep_ log groups after lambda deletion instead.
+
 # @xoi/serverless-log-dumpster
 
 **Serverless plugin that archives CloudWatch Log Groups before their deletion**
