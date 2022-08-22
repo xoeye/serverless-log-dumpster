@@ -1,3 +1,8 @@
+# v1.0.4
+This is the last maintenance update for this project. Please see [serverless-log-keeper](https://github.com/xoeye/serverless-log-keeper) instead.
+
+- Allow serverless >= 3.x as peerDependency 
+
 # v1.0.3
 
 - Fix runtime error when log group names are defined through CF intrinsic functions
